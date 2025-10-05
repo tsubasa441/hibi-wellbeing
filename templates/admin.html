@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>管理者画面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        h1, h2 { margin-top: 2rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+        th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+        th { background-color: #eee; }
+        form.inline { display: inline; }
+        input[type="text"], input[type="date"] {
+            padding: 0.3em;
+            margin-right: 0.5em;
+        }
+        button {
+            padding: 0.3em 0.7em;
+            cursor: pointer;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 3px;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        .add-event-form {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>管理者画面</h1>
+
+    <section class="add-event-form">
+        <h2>新規イベント追加</h2>
+        <form method="POST" action="{{ url_for('add_event') }}">
+            <input type="text" name="event_name" placeholder="イベント名" required />
+            <input type="date" name="event_date" required />
+            <button type="submit">追加</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>イベント一覧</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>イベント名</th>
+                    <th>日付</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.name }}</td>
+                    <td>{{ event.date }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" class="inline" onsubmit="return confirm('本当に削除しますか？');">
+                            <button type="submit" class="delete-btn">削除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4">イベントがありません</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>予約一覧</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>名前</th>
+                    <th>メールアドレス</th>
+                    <th>イベント名</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for name, email, event_name in reservations %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ email }}</td>
+                    <td>{{ event_name }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3">予約がありません</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>メールごとの予約回数</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>メールアドレス</th>
+                    <th>予約回数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for email, count in email_counts.items() %}
+                <tr>
+                    <td>{{ email }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2">予約データがありません</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>イベント別参加人数</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>イベント名</th>
+                    <th>参加人数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event_name, count in event_counts %}
+                <tr>
+                    <td>{{ event_name }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2">参加者データがありません</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</body>
+</html>

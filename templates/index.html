@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>イベント予約フォーム</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .error { color: red; margin-bottom: 1em; }
+        form { max-width: 400px; }
+        label { display: block; margin-top: 1em; }
+        input[type="text"], input[type="email"], select, textarea {
+            width: 100%; padding: 0.5em; margin-top: 0.25em;
+            box-sizing: border-box;
+        }
+        button { margin-top: 1.5em; padding: 0.5em 1em; font-size: 1em; }
+        .terms { margin-top: 1em; }
+    </style>
+</head>
+<body class="customer">
+    <h1>イベント予約フォーム</h1>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('customer_form') }}">
+        <label for="name">お名前<span style="color:red;">*</span></label>
+        <input type="text" id="name" name="name" required value="{{ request.form.get('name', '') }}" />
+
+        <label for="event">参加イベント<span style="color:red;">*</span></label>
+        <select id="event" name="event" required>
+            <option value="" disabled selected>選択してください</option>
+            {% for id_, name, date in events %}
+                <option value="{{ id_ }}" {% if request.form.get('event') == id_|string %}selected{% endif %}>
+                    {{ name }} ({{ date }})
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="email">メールアドレス<span style="color:red;">*</span></label>
+        <input type="email" id="email" name="email" required value="{{ request.form.get('email', '') }}" />
+
+        <label for="confirm_email">メールアドレス（確認）<span style="color:red;">*</span></label>
+        <input type="email" id="confirm_email" name="confirm_email" required value="{{ request.form.get('confirm_email', '') }}" />
+
+        <label for="comment">コメント（任意）</label>
+        <textarea id="comment" name="comment" rows="4">{{ request.form.get('comment', '') }}</textarea>
+        <button type="submit">予約する</button>
+    </form>
+</body>
+</html>
