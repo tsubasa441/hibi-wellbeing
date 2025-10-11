@@ -4,28 +4,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>イベント予約フォーム</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; }
-        .error { color: red; margin-bottom: 1em; }
-        form { max-width: 400px; }
-        label { display: block; margin-top: 1em; }
-        input[type="text"], input[type="email"], select, textarea {
-            width: 100%; padding: 0.5em; margin-top: 0.25em;
-            box-sizing: border-box;
-        }
-        button { margin-top: 1.5em; padding: 0.5em 1em; font-size: 1em; }
-        .terms { margin-top: 1em; }
-    </style>
 </head>
-<body class="customer">
-    <h1>イベント予約フォーム</h1>
-
+<body>
+    <div class="top-left-image">
+        <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" >
+    </div>
     {% if error %}
     <div class="error">{{ error }}</div>
     {% endif %}
-
     <form method="POST" action="{{ url_for('customer_form') }}">
+        <h1>予約フォーム</h1>
         <label for="name">お名前<span style="color:red;">*</span></label>
         <input type="text" id="name" name="name" required value="{{ request.form.get('name', '') }}" />
 
@@ -47,6 +35,12 @@
 
         <label for="comment">コメント（任意）</label>
         <textarea id="comment" name="comment" rows="4">{{ request.form.get('comment', '') }}</textarea>
+        <a href="documents/Hibi_プライバシー.pdf" target="_blank" rel="noopener noreferrer">個人情報保護方針はこちら</a>
+        <label>
+            <input type="checkbox" id="terms" name="terms" value="agree" {% if request.form.get('terms') %}checked{% endif %} />
+                確認しました<span style="color:red;">*</span>
+        </label>
+
         <button type="submit">予約する</button>
     </form>
 </body>

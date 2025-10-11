@@ -1,52 +1,150 @@
-.customer {
-  background-color: #FFFFDD;
-  color: black;
-  padding: 40px 20px; /* 上下にゆとり */
-  min-height: 100vh;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 18px;
-  line-height: 1.6;
-  box-sizing: border-box;
-  margin: 100 px auto;
-  width: 500 px;
+/* 全体の背景と基本フォント */
+body {
+    background-color: #FFFFDD;
+    font-family: 'Kosugi Maru', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-.customer > .container {
-  background: white;
-  padding: 30px 40px;
-  border-radius: 10px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-  max-width: 600px;
-  width: 90%;
-  margin: 20px auto; /* コンテナ自体は上下に少しマージン */
+/* フォーム全体の中央揃えとスタイル */
+form {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* 例えばフォームのinputやbuttonの大きさ調整 */
-input[type="text"],
-input[type="email"],
-input[type="date"],
-textarea,
-select {
-  width: 100%;
-  padding: 12px 15px;
-  margin: 10px 0 20px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 16px;
-  box-sizing: border-box;
+/* 各ラベルのスタイル */
+form label {
+    display: block;
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 16px;
 }
 
-button {
-  background-color: #007BFF;
-  border: none;
-  color: white;
-  padding: 12px 25px;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.top-left-image {
+    position: absolute;
+    top: 20px;
+    left: 10px;
 }
 
-button:hover {
-  background-color: #0056b3;
+.top-left-image img {
+    width: 200px; /* 画像サイズを調整 */
+    height: auto;
+}
+
+.pdf-container {
+    width: 100%;
+    max-width: 800px;
+    height: 600px;
+    border: 1px solid #ccc;
+    overflow: hidden;
+}
+
+.pdf-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+
+/* フォームの位置を調整（画像と重ならないように） */
+form {
+    margin-top: 120px;  /* 画像の高さより大きめに調整 */
+    padding-left: 20px;
+}
+
+.success{
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #FFFFDD;
+    padding: 30px 40px;
+}
+
+
+/* 各入力欄、セレクト、テキストエリア */
+form input[type="text"],
+form input[type="email"],
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: #66afe9;
+    outline: none;
+}
+
+/* コメント欄 */
+form textarea {
+    resize: vertical;
+}
+
+/* チェックボックスとそのラベル */
+.terms {
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+}
+
+.terms input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+/* 送信ボタン */
+form button[type="submit"] {
+    margin-top: 30px;
+    width: 100%;
+    background-color: #007BFF;
+    color: white;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* エラーメッセージのスタイル */
+.error {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #ffe0e0;
+    color: #c0392b;
+    padding: 12px 20px;
+    border-left: 6px solid #e74c3c;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 640px) {
+    form {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    form label,
+    form input,
+    form select,
+    form textarea,
+    form button {
+        font-size: 15px;
+    }
 }

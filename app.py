@@ -66,7 +66,7 @@ def customer_form():
         if email != confirm_email:
             error = "メールアドレスが一致しません。"
         elif not terms:
-            error = "利用規約に同意してください。"
+            error = "個人情報保護方針が確認できていません。"
 
         if error:
             return render_template('index.html', events=events, error=error)
@@ -96,7 +96,7 @@ def customer_form():
 
 @app.route('/success')
 def success():
-    return "<h1>予約を受け付けました。ありがとうございました！</h1>"
+    return render_template('success.html')
 
 @app.route('/admin', methods=['GET'])
 def admin():
