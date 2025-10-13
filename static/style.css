@@ -136,6 +136,6 @@ form button[type="submit"]:hover {
 /* レスポンシブ対応 */
 @media (max-width: 640px) {
     .top-left-image {
-        transform: translateX(-50%);
+        transform: translateX(50%);
     }
 }
