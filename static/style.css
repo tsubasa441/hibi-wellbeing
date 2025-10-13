@@ -132,19 +132,3 @@ form button[type="submit"]:hover {
     border-radius: 6px;
     font-weight: bold;
 }
-
-/* レスポンシブ対応 */
-@media (max-width: 640px) {
-    form {
-        padding: 20px;
-        margin: 20px;
-    }
-
-    form label,
-    form input,
-    form select,
-    form textarea,
-    form button {
-        font-size: 15px;
-    }
-}
