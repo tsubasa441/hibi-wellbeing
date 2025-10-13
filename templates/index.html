@@ -35,7 +35,7 @@
 
         <label for="comment">コメント（任意）</label>
         <textarea id="comment" name="comment" rows="4">{{ request.form.get('comment', '') }}</textarea>
-        <a href="{{ url_for('static', filename='documents/Hibi_プライバシー.pdf') }}" target="_blank" rel="noopener noreferrer">
+        <a href="{{ url_for('static', filename='documents/Hibi_プライバシー.pdf') }}" target="_blank">
             個人情報保護方針はこちら
         </a>
         <label>
