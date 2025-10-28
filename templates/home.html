@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hibi トップページ</title>
+    <style>
+        body {
+            background-color: #FFFFDD;
+            font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .logo {
+            width: 200px;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column; /* 横→縦に変更 */
+            gap: 30px; /* ボタン間のスペース */
+            align-items: center; /* ボタンを中央揃えにする場合 */
+        }
+
+        .menu-button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            text-align: center;
+            width: 130px; /* 任意の横幅に固定 */
+        }
+
+        .menu-button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- ロゴ画像 -->
+    <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" class="logo">
+    <!-- メニューボタン -->
+    <div class="button-container">
+        <a href="{{ url_for('customer_form') }}" class="menu-button">イベント予約</a>
+        <a href="{{ url_for('reservation_login') }}" class="menu-button">予約確認</a>
+    </div>
+</body>
+</html>
+任

@@ -3,6 +3,7 @@ import sqlite3
 from datetime import datetime
 import os
 import secrets
+import re
 
 print(secrets.token_urlsafe(32))
 
@@ -12,6 +13,14 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 app.config['SECRET_KEY'] = SECRET_KEY
 
 DB_NAME = 'database.db'
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/check')
+def check():
+    return "<h2>予約確認ページ（準備中）</h2>"
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
@@ -30,6 +39,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL,
+            password TEXT NOT NULL,
             event_id INTEGER NOT NULL,
             comment TEXT,
             FOREIGN KEY (event_id) REFERENCES events(id)
@@ -40,7 +50,7 @@ def init_db():
 
 init_db()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 def customer_form():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -59,14 +69,21 @@ def customer_form():
         event_id = request.form['event']
         email = request.form['email']
         confirm_email = request.form['confirm_email']
+        password = request.form['password']
         comment = request.form.get('comment', '')
         terms = request.form.get('terms')
 
         error = None
-        if email != confirm_email:
+
+        # ====== ✅ パスワードチェック追加 ======
+        password_pattern = r'^[A-Za-z0-9]{8,16}$'
+        if not re.match(password_pattern, password):
+            error = "パスワードは半角英数字のみ、8～16文字で入力してください。"
+        elif email != confirm_email:
             error = "メールアドレスが一致しません。"
         elif not terms:
             error = "個人情報保護方針が確認できていません。"
+        # =======================================
 
         if error:
             return render_template('index.html', events=events, error=error)
@@ -74,7 +91,7 @@ def customer_form():
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
 
-        # ここで予約の重複チェック（必要に応じて）
+        # 重複チェック
         c.execute('SELECT id FROM reservations WHERE email = ? AND event_id = ?', (email, event_id))
         existing = c.fetchone()
 
@@ -84,19 +101,45 @@ def customer_form():
             return render_template('index.html', events=events, error=error)
 
         # 新規登録
-        c.execute('INSERT INTO reservations (name, email, event_id, comment) VALUES (?, ?, ?, ?)',
-                  (name, email, event_id, comment))
+        c.execute('INSERT INTO reservations (name, email, password, event_id, comment) VALUES (?, ?, ?, ?, ?)',
+                  (name, email, password, event_id, comment))
         conn.commit()
         conn.close()
 
         return redirect(url_for('success'))
 
-    # GETの場合は普通にフォーム表示
     return render_template('index.html', events=events)
 
 @app.route('/success')
 def success():
     return render_template('success.html')
+
+@app.route('/reservation_login', methods=['GET', 'POST'])
+def reservation_login():
+    error = None
+    reservations = []
+
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        c.execute('''
+            SELECT r.name, r.comment, e.name, e.date
+            FROM reservations r
+            JOIN events e ON r.event_id = e.id
+            WHERE r.email = ? AND r.password = ?
+        ''', (email, password))
+        reservations = c.fetchall()
+        conn.close()
+
+        if not reservations:
+            error = "メールアドレスまたはパスワードが間違っています。"
+        else:
+            return render_template('reservation_list.html', reservations=reservations)
+
+    return render_template('reservation_login.html', error=error)
 
 @app.route('/admin', methods=['GET'])
 def admin():
@@ -162,4 +205,4 @@ def delete_event(event_id):
     return redirect(url_for('admin'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

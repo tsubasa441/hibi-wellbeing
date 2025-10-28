@@ -1,0 +1,10 @@
+<h1>予約内容</h1>
+<ul>
+    {% for name, comment, event_name, event_date in reservations %}
+    <li>
+        イベント: {{ event_name }} ({{ event_date }})<br>
+        お名前: {{ name }}<br>
+        コメント: {{ comment }}
+    </li>
+    {% endfor %}
+</ul>

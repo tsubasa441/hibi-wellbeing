@@ -33,15 +33,18 @@
         <label for="confirm_email">メールアドレス（確認）<span style="color:red;">*</span></label>
         <input type="email" id="confirm_email" name="confirm_email" required value="{{ request.form.get('confirm_email', '') }}" />
 
+        <label for="password">パスワード<span style="color:red;">*</span></label>
+        <input type="password" id="password" name="password" required />
+
         <label for="comment">コメント（任意）</label>
         <textarea id="comment" name="comment" rows="4">{{ request.form.get('comment', '') }}</textarea>
-        <a href="{{ url_for('static', filename='documents/hibi_プライバシー.pdf') }}" target="_blank">
-            個人情報保護方針はこちら
-        </a>
         <label>
             <input type="checkbox" id="terms" name="terms" value="agree" {% if request.form.get('terms') %}checked{% endif %} />
-                確認しました<span style="color:red;">*</span>
+                以下を確認しました<span style="color:red;">*</span>
         </label>
+        <a href="{{ url_for('static', filename='documents/hibi_プライバシー.pdf') }}" target="_blank">
+            個人情報保護方針
+        </a>
 
         <button type="submit">予約する</button>
     </form>
