@@ -8,8 +8,8 @@ body {
 
 /* フォーム全体の中央揃えとスタイル */
 form {
-    max-width: 600px;
-    margin: 50px auto;
+    max-width: 80%;
+    margin: 0px auto;
     background-color: #fff;
     padding: 30px 40px;
     border-radius: 12px;
@@ -24,14 +24,17 @@ form label {
     font-size: 16px;
 }
 
-.top-left-image {
-    position: absolute;
-    top: 20px;
-    left: 10px;
+.top-image {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
 }
 
-.top-left-image img {
-    width: 200px; /* 画像サイズを調整 */
+.top-image img {
+    max-width: 200px;
+    width: 40%;
+    /* 画像サイズを調整 */
     height: auto;
 }
 
@@ -52,11 +55,10 @@ form label {
 
 /* フォームの位置を調整（画像と重ならないように） */
 form {
-    margin-top: 120px;  /* 画像の高さより大きめに調整 */
     padding-left: 20px;
 }
 
-.success{
+.success {
     max-width: 600px;
     margin: 50px auto;
     background-color: #FFFFDD;
@@ -79,6 +81,7 @@ form textarea {
     box-sizing: border-box;
     transition: border-color 0.3s ease;
 }
+
 form input:focus,
 form select:focus,
 form textarea:focus {
@@ -131,11 +134,4 @@ form button[type="submit"]:hover {
     border-left: 6px solid #e74c3c;
     border-radius: 6px;
     font-weight: bold;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 640px) {
-    .top-left-image {
-        transform: translateX(50%);
-    }
 }
