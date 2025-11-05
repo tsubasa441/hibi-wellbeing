@@ -53,10 +53,7 @@ form label {
 }
 
 
-/* フォームの位置を調整（画像と重ならないように） */
-form {
-    padding-left: 20px;
-}
+
 
 .success {
     max-width: 600px;
@@ -126,11 +123,11 @@ form button[type="submit"]:hover {
 
 /* エラーメッセージのスタイル */
 .error {
-    max-width: 600px;
+    max-width: 80%;
     margin: 20px auto;
     background-color: #ffe0e0;
     color: #c0392b;
-    padding: 12px 20px;
+    padding: 12px 37px;
     border-left: 6px solid #e74c3c;
     border-radius: 6px;
     font-weight: bold;
