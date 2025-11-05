@@ -55,7 +55,9 @@
 </head>
 <body>
     <!-- ロゴ画像 -->
-    <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" class="logo">
+    <div class="top-image">
+        <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" class="logo">
+    </div>
     <!-- メニューボタン -->
     <div class="button-container">
         <a href="{{ url_for('customer_form') }}" class="menu-button">イベント予約</a>
@@ -63,4 +65,3 @@
     </div>
 </body>
 </html>
-任
