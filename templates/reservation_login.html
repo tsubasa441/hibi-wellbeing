@@ -1,12 +1,19 @@
-<form method="POST" action="{{ url_for('reservation_login') }}">
-    <label for="email">メールアドレス</label>
-    <input type="email" id="email" name="email" required>
-
-    <label for="password">パスワード</label>
-    <input type="password" id="password" name="password" required>
-
-    <button type="submit">ログイン</button>
-    {% if error %}
-        <p style="color:red">{{ error }}</p>
-    {% endif %}
-</form>
+<html lang="ja">
+<title> Hibi wellbeing ログイン </title>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hibi トップページ</title>
+    <style>
+        body{
+            background-color: #FFFFDD;
+        }
+    </style>
+</head>
+<body>
+    <form method="POST" action="{{ url_for('customer_form') }}">
+        <label for="email">メールアドレス<span style="color:red;">*</span></label>
+        <label for="password">パスワード<span style="color:red;">*</span></label>
+    </form>
+</body>
+</html>
