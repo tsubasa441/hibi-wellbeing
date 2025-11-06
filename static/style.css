@@ -52,8 +52,53 @@ form label {
     border: none;
 }
 
+.top-item{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    margin: 30px auto;
+}
 
+.top-item:not(:last-child) {
+    margin-bottom: 20px;
+}
 
+.top-item:nth-of-type(4) {
+    margin-bottom: 60px;
+}
+
+.top-item input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    min-width: 25%;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.menu-button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 15px 40px;
+    margin: 0 ,auto;
+    border-radius: 8px;
+    text-align: center;
+    text-align: center;
+    min-width: 25%;
+    transition: 0.3s;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.menu-button:hover {
+    background-color: #555;
+}
+
+.top-form{
+    
+}
 
 .success {
     max-width: 600px;
@@ -61,7 +106,6 @@ form label {
     background-color: #FFFFDD;
     padding: 30px 40px;
 }
-
 
 /* 各入力欄、セレクト、テキストエリア */
 form input[type="text"],
