@@ -62,6 +62,8 @@
         <input type="email" name="email" placeholder="メールアドレス" required>
         <input type="password" name="password" placeholder="パスワード" required>
         <button type="submit" class="menu-button">ログイン</button>
+    </form>
+    <form action="{{ url_for('register') }}" method="post">
         <button type="submit" class="menu-button">新規登録</button>
     </form>
 </body>

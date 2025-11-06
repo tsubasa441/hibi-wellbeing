@@ -45,6 +45,16 @@ def init_db():
             FOREIGN KEY (event_id) REFERENCES events(id)
         )
     ''')
+    # reservationsテーブルはそのまま
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS user (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            is_provisional BOOL DEFAULT TRUE,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -109,6 +119,75 @@ def customer_form():
         return redirect(url_for('success'))
 
     return render_template('index.html', events=events)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    return render_template('register.html')
+
+@app.route('/register_verification', methods=['GET', 'POST'])
+def act_register():
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        confirm_email = request.form['confirm_email']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        terms = request.form.get('terms')
+
+        error = None
+
+        # ============= 入力チェック ==============
+        password_pattern = r'^[A-Za-z0-9]{8,16}$'
+        if email != confirm_email:
+            error = "メールアドレスが一致しません。"
+        elif not re.match(password_pattern, password):
+            error = "パスワードは半角英数字のみ、8～16文字で入力してください。"
+
+        elif password != confirm_password:
+            error = "パスワードが一致しません。"
+
+        elif not terms:
+            error = "個人情報保護方針が確認できていません。"
+        # ========================================
+            
+        if error:
+            return render_template('register.html',   error=error,
+                name=name,
+                email=email,
+                confirm_email=confirm_email,
+                password=password,
+                confirm_password=confirm_password,
+                terms=terms)
+        # ============= メールアドレス重複チェック ==============
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        c.execute('SELECT user_id FROM user WHERE email == ?',(email,))
+        row = c.fetchall()
+        conn.close()
+        if row.__len__() != 0:
+            error = "既に登録されているメールアドレスです。"
+        # =======================================================
+        
+        if error:
+            return render_template('register.html',  error=error)
+
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        # 新規登録
+        cursor.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)',
+                  (name, email, password))
+        conn.commit()
+        conn.close()
+        
+        # リソース消去
+        request.close()
+
+        return render_template('register_verification.html',email = email)
+    
+    return render_template('register.html',)
+
 
 @app.route('/success')
 def success():

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!-- 
+--TODO YUYA KOMICHI--
+・パスワードの表示ボタン（目アイコン）がフォーカスを外すと消える
+・パスワード確認追加
+・パスワード英語数字記号三種必須にする
+・画面名を修正する
+・エラーラベルの幅をフォームに合わせる
+・個人情報保護方針の位置調整
+・個人情報保護方針未表示時にチェックボックス非活性
+・確認メール押したら仮登録フラグtrueにする
+・エラー時入力内容消す
+・画面遷移させないようにする
+ -->
+
+<html lang="ja">
+  <title>Hibi wellbeing 新規登録</title>
+
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+
+  <body>
+    <div class="top-image">
+      <img
+        src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
+        alt="ロゴ"
+      />
+    </div>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('act_register') }}">
+      <h1>新規登録</h1>
+      <label for="name">お名前<span style="color: red">*</span></label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        autocomplete="name"
+        required
+        value="{{ request.form.get('name', '') }}"
+      />
+
+      <label for="email">メールアドレス<span style="color: red">*</span></label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        autocomplete="email"
+        required
+        value="{{ request.form.get('email', '') }}"
+      />
+
+      <label for="confirm_email"
+        >メールアドレス（確認）<span style="color: red">*</span></label
+      >
+      <input
+        type="email"
+        id="confirm_email"
+        name="confirm_email"
+        required
+        value="{{ request.form.get('confirm_email', '') }}"
+      />
+
+      <label for="password">パスワード<span style="color: red">*</span></label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+        value="{{ request.form.get('password', '') }}"
+      />
+
+      <label for="confirm_password"
+        >パスワード（確認）<span style="color: red">*</span></label
+      >
+      <input
+        type="password"
+        id="confirm_password"
+        name="confirm_password"
+        required
+        value="{{ request.form.get('confirm_password', '') }}"
+      />
+      <label>
+        <input type="checkbox" id="terms" name="terms" value="agree" {% if
+        request.form.get('terms') %}checked{% endif %} />
+        以下を確認しました<span style="color: red">*</span>
+      </label>
+      <a
+        href="{{ url_for('static', filename='documents/hibi_プライバシー.pdf') }}"
+        target="_blank"
+      >
+        個人情報保護方針
+      </a>
+
+      <button type="submit">予約する</button>
+    </form>
+  </body>
+</html>
