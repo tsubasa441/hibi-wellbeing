@@ -180,6 +180,30 @@ def admin():
                            email_counts=email_counts,
                            event_counts=event_counts)
 
+@app.route('/mainmenu', methods=['POST'])
+def mainmenu():
+    error = None
+    account = []
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        conn = sqlite3.connect("database.db")
+        c = conn.cursor()
+        c.execute('''
+            SELECT r.email, e.password
+            FROM reservations r
+            JOIN events e ON r.event_id = e.id
+            WHERE r.email = ? AND r.password = ?
+        ''', (email, password))
+        account = c.fetchall()
+        conn.close()
+    if not account:
+        error = "メールアドレスまたはパスワードが間違っています。"
+    else:
+        return render_template('reservation_list.html', account=account)
+    
+    return render_template('mainmenu.html', error=error)
+    
 @app.route('/admin/events', methods=['POST'])
 def add_event():
     event_name = request.form.get('event_name')

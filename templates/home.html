@@ -58,10 +58,11 @@
     <div class="top-image">
         <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" class="logo">
     </div>
-    <!-- メニューボタン -->
-    <div class="button-container">
-        <a href="{{ url_for('customer_form') }}" class="menu-button">イベント予約</a>
-        <a href="{{ url_for('reservation_login') }}" class="menu-button">予約確認</a>
-    </div>
+    <form action="{{ url_for('mainmenu') }}" method="POST">
+        <input type="email" name="email" placeholder="メールアドレス" required>
+        <input type="password" name="password" placeholder="パスワード" required>
+        <button type="submit" class="menu-button">ログイン</button>
+        <button type="submit" class="menu-button">新規登録</button>
+    </form>
 </body>
 </html>
