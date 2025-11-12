@@ -60,14 +60,6 @@ form label {
     margin: 30px auto;
 }
 
-.top-item:not(:last-child) {
-    margin-bottom: 20px;
-}
-
-.top-item:nth-of-type(4) {
-    margin-bottom: 60px;
-}
-
 .top-item input {
     padding: 10px;
     border: 1px solid #ccc;
@@ -94,10 +86,6 @@ form label {
 
 .menu-button:hover {
     background-color: #555;
-}
-
-.top-form{
-    
 }
 
 .success {
@@ -151,7 +139,7 @@ form textarea {
 form button[type="submit"] {
     margin-top: 30px;
     width: 100%;
-    background-color: #007BFF;
+    background-color: #333;
     color: white;
     padding: 14px;
     font-size: 16px;
@@ -162,7 +150,7 @@ form button[type="submit"] {
 }
 
 form button[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: #555;
 }
 
 /* エラーメッセージのスタイル */

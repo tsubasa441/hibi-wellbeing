@@ -193,32 +193,35 @@ def act_register():
 def success():
     return render_template('success.html')
 
-@app.route('/reservation_login', methods=['GET', 'POST'])
-def reservation_login():
-    error = None
-    reservations = []
+@app.route('/handle_form', methods=['GET', 'POST'])
+def handle_form():
+    action = request.form.get('action')
+    if action == 'login':
+        if request.method == 'POST':
+            error = None
+            reservations = []
+            email = request.form['email']
+            password = request.form['password']
 
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
+            conn = sqlite3.connect(DB_NAME)
+            c = conn.cursor()
+            c.execute('''
+                SELECT r.name, r.comment, e.name, e.date
+                FROM reservations r
+                JOIN events e ON r.event_id = e.id
+                WHERE r.email = ? AND r.password = ?
+            ''', (email, password))
+            reservations = c.fetchall()
+            conn.close()
 
-        conn = sqlite3.connect(DB_NAME)
-        c = conn.cursor()
-        c.execute('''
-            SELECT r.name, r.comment, e.name, e.date
-            FROM reservations r
-            JOIN events e ON r.event_id = e.id
-            WHERE r.email = ? AND r.password = ?
-        ''', (email, password))
-        reservations = c.fetchall()
-        conn.close()
-
-        if not reservations:
-            error = "メールアドレスまたはパスワードが間違っています。"
-        else:
-            return render_template('reservation_list.html', reservations=reservations)
-
-    return render_template('reservation_login.html', error=error)
+            if not reservations:
+                error = "メールアドレスまたはパスワードが間違っています。"
+            else:
+                return render_template('menu.html', reservations=reservations)
+    elif action == 'register':
+        return redirect(url_for('register'))
+    
+    return render_template('home.html', error=error)
 
 @app.route('/admin', methods=['GET'])
 def admin():
