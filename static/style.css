@@ -95,6 +95,34 @@ form label {
     padding: 30px 40px;
 }
 
+.pass_box {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.pass_box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 2.5em;
+    height: 2.4em;
+    font-size: 1em;
+}
+
+.pass_box i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+    display: none;
+}
+
+.pass_box i:hover {
+    color: #333;
+}
+
 /* 各入力欄、セレクト、テキストエリア */
 form input[type="text"],
 form input[type="email"],

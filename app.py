@@ -86,9 +86,9 @@ def customer_form():
         error = None
 
         # ====== ✅ パスワードチェック追加 ======
-        password_pattern = r'^[A-Za-z0-9]{8,16}$'
+        password_pattern = r'^((?=.*[A-Za-z])(?=.[0-9])(?=.*[!-/:-@[-`{-~])).{8,}$'
         if not re.match(password_pattern, password):
-            error = "パスワードは半角英数字のみ、8～16文字で入力してください。"
+            error = "パスワードは英語数字記号を含む、8文字以上で入力してください。"
         elif email != confirm_email:
             error = "メールアドレスが一致しません。"
         elif not terms:
@@ -138,12 +138,11 @@ def act_register():
         error = None
 
         # ============= 入力チェック ==============
-        password_pattern = r'^[A-Za-z0-9]{8,16}$'
+        password_pattern = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!-/:-@[-`{-~])[A-Za-z\d!-/:-@[-`{-~]{8,}$'
         if email != confirm_email:
             error = "メールアドレスが一致しません。"
         elif not re.match(password_pattern, password):
-            error = "パスワードは半角英数字のみ、8～16文字で入力してください。"
-
+            error = "パスワードは英語数字記号を含む、8文字以上で入力してください。"
         elif password != confirm_password:
             error = "パスワードが一致しません。"
 
