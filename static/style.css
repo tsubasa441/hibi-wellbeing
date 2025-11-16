@@ -7,7 +7,7 @@ body {
 }
 
 /* フォーム全体の中央揃えとスタイル */
-form {
+.mainfield {
     max-width: 80%;
     margin: 0px auto;
     background-color: #fff;
@@ -17,7 +17,7 @@ form {
 }
 
 /* 各ラベルのスタイル */
-form label {
+.mainfield label {
     display: block;
     margin-top: 20px;
     font-weight: bold;
@@ -191,4 +191,19 @@ form button[type="submit"]:hover {
     border-left: 6px solid #e74c3c;
     border-radius: 6px;
     font-weight: bold;
+}
+
+.success-title {
+    line-height: 1.8;
+    color: #000000;
+    text-align: center;
+    margin: 20px 0 30px;
+}
+
+.success-message {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    text-align: center;
+    margin: 20px 0 30px;
 }

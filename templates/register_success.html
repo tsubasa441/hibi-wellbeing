@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body class="register_success">
+    <div class="top-image">
+      <img
+        src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
+        alt="ロゴ"
+      />
+    </div>
+    <div class="mainfield">
+      <h1 class="success-title">登録完了</h1>
+      <p class="success-message">
+        ご登録いただきありがとうございます。<br>
+        アカウントの作成が正常に完了しました。<br>
+        下のボタンよりログイン画面へお進みください。
+      </p>
+      <p></p>
+      <form class="top-form" method="GET" action="{{ url_for('home') }}">
+        <div class="top-item">
+          <button class="menu-button" type="submit" class="menu-button">
+            ログインへ
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

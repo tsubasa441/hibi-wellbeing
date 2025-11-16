@@ -1,29 +1,64 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hibi トップページ</title>
-</head>
-<body>
+  </head>
+  <body>
     <!-- ロゴ画像 -->
     <div class="top-image">
-        <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" class="logo">
+      <img
+        src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
+        alt="ロゴ"
+        class="logo"
+      />
     </div>
-    <form action="{{ url_for('handle_form') }}" method="post">
+    
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <div class="mainfield">
+      <form action="{{ url_for('handle_form') }}" method="post">
         <div class="top-item">
-          <input type="email" name="email" placeholder="メールアドレス" required>
+          <input
+            type="email"
+            name="email"
+            placeholder="メールアドレス"
+            required
+          />
         </div>
         <div class="top-item">
-          <input type="password" name="password" placeholder="パスワード" required>
+          <input
+            type="password"
+            name="password"
+            placeholder="パスワード"
+            required
+          />
         </div>
         <div class="top-item">
-          <button class="menu-button" type="submit" name="action" value="login" class="menu-button">ログイン</button>
+          <button
+            class="menu-button"
+            type="submit"
+            name="action"
+            value="login"
+            class="menu-button"
+          >
+            ログイン
+          </button>
         </div>
+      </form>
+      <form class="top-form" method="POST" action="{{ url_for('register') }}">
         <div class="top-item">
-          <button class="menu-button" type="submit" name="action" value="register" class="menu-button">新規登録</button>
+          <button class="menu-button" type="submit" class="menu-button">
+            新規登録
+          </button>
         </div>
-    </form>
-</body>
+      </form>
+    </div>
+  </body>
 </html>
