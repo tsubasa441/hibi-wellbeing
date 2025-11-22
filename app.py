@@ -1,16 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, flash, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
 import os
 import secrets
 import re
 
+## シークレットキー挿入
+app = Flask(__name__)
+secret = secrets.token_urlsafe(32)
+app.config['SECRET_KEY'] = secret
+
+
 print(secrets.token_urlsafe(32))
 
-app = Flask(__name__)
-
-SECRET_KEY = os.environ.get("SECRET_KEY")
-app.config['SECRET_KEY'] = SECRET_KEY
 
 DB_NAME = 'database.db'
 
@@ -27,8 +29,9 @@ def init_db():
     c = conn.cursor()
     # eventsテーブルの再作成時に日付カラム追加
     c.execute('''
-        CREATE TABLE IF NOT EXISTS events (
+        CREATE TABLE IF NOT EXISTS events (attendance
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            attendance INTEGER NOT NULL UNIQUE,
             name TEXT NOT NULL UNIQUE,
             date TEXT NOT NULL
         )
@@ -176,15 +179,21 @@ def admin():
 
     # 予約一覧（名前・メール・イベント名）
     c.execute('''
-        SELECT r.name, r.email, e.name
+        SELECT u.name, u.email, e.name
         FROM reservations r
+        JOIN user u ON r.user_id = u.user_id
         JOIN events e ON r.event_id = e.id
         ORDER BY r.id DESC
     ''')
     reservations = c.fetchall()
 
     # メールごとの予約回数
-    c.execute('SELECT email, COUNT(*) FROM reservations GROUP BY email')
+    c.execute('''
+        SELECT COUNT(*)
+        FROM reservations r
+        JOIN user u
+        ON r.user_id = u.user_id  GROUP BY u.user_id
+        ''')
     email_counts = dict(c.fetchall())
 
     # イベント別参加人数
@@ -231,15 +240,28 @@ def mainmenu():
 @app.route('/admin/events', methods=['POST'])
 def add_event():
     event_name = request.form.get('event_name')
+    event_attendance = request.form.get('event_attendance')
     event_date = request.form.get('event_date')
-    if event_name and event_date:
-        conn = sqlite3.connect(DB_NAME)
-        c = conn.cursor()
-        c.execute('SELECT id FROM events WHERE name = ?', (event_name,))
-        if not c.fetchone():
-            c.execute('INSERT INTO events (name, date) VALUES (?, ?)', (event_name, event_date))
-            conn.commit()
+    ## 入力チェック
+    if ((event_name and event_date and event_attendance)==False):
+        flash("入力されていない項目があります", "error")
         conn.close()
+        return redirect(url_for('admin'))
+        
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute('SELECT id FROM events WHERE name = ?', (event_name,))
+    
+    ## 登録されている場合
+    if c.fetchone():
+        flash("既に登録されているイベントです。", "error")
+        conn.close()
+        return redirect(url_for('admin'))
+    
+    flash("イベント「"+event_name+"」を追加しました。", "success")
+    c.execute('INSERT INTO events (name, date) VALUES (?, ?)', (event_name, event_date))
+    conn.commit()
+    conn.close()
     return redirect(url_for('admin'))
 
 @app.route('/admin/events/delete/<int:event_id>', methods=['POST'])

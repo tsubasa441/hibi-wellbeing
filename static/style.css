@@ -194,6 +194,18 @@ form button[type="submit"]:hover {
     font-weight: bold;
 }
 
+/* 成功メッセージのスタイル */
+.success {
+    max-width: 80%;
+    margin: 20px auto;
+    background-color: #e0ffe0;
+    color: #3cc02b;
+    padding: 12px 37px;
+    border-left: 6px solid #3cc02b;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
 .success-title {
     line-height: 1.8;
     color: #000000;
