@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+  />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hibi トップページ</title>
+</head>
+<body>
+    <!-- ロゴ画像 -->
+    <div class="top-image">
+      <img
+        src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
+        alt="ロゴ"
+        class="logo"
+      />
+    </div>
+    <div class="top-item">
+        <button
+            class="menu-button"
+            type="submit"
+            name="action"
+            value="login"
+        >
+            イベント予約
+        </button>
+    </div>
+    <div class="top-item">
+        <button class="menu-button" type="submit">
+            予約確認
+        </button>
+    </div>
+</body>
+</html>

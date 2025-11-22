@@ -71,10 +71,12 @@ body {
 
 .menu-button {
     background-color: #333;
+    width: 60%;
     color: #fff;
     border: none;
     padding: 15px 40px;
     margin: 0 ,auto;
+    font-size: 16px;
     border-radius: 8px;
     text-align: center;
     text-align: center;
@@ -163,7 +165,6 @@ form textarea {
     transform: scale(1.2);
 }
 
-/* 送信ボタン */
 form button[type="submit"] {
     margin-top: 30px;
     width: 100%;
