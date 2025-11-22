@@ -37,15 +37,14 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS reservations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            password TEXT NOT NULL,
             event_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
             comment TEXT,
             FOREIGN KEY (event_id) REFERENCES events(id)
+            FOREIGN KEY (user_id) REFERENCES user(user_id)
         )
     ''')
-    # reservationsテーブルはそのまま
+    # userテーブルはそのまま
     c.execute('''
         CREATE TABLE IF NOT EXISTS user (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,71 +59,12 @@ def init_db():
 
 init_db()
 
-@app.route('/index', methods=['GET', 'POST'])
-def customer_form():
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    c.execute('SELECT id, name, date FROM events ORDER BY id')
-    rows = c.fetchall()
-    conn.close()
-
-    events = []
-    for id_, name, date_str in rows:
-        dt = datetime.strptime(date_str, '%Y-%m-%d')
-        formatted_date = dt.strftime('%Y/%m/%d')
-        events.append((id_, name, formatted_date))
-
-    if request.method == 'POST':
-        name = request.form['name']
-        event_id = request.form['event']
-        email = request.form['email']
-        confirm_email = request.form['confirm_email']
-        password = request.form['password']
-        comment = request.form.get('comment', '')
-        terms = request.form.get('terms')
-
-        error = None
-
-        # ====== ✅ パスワードチェック追加 ======
-        password_pattern = r'^((?=.*[A-Za-z])(?=.[0-9])(?=.*[!-/:-@[-`{-~])).{8,}$'
-        if not re.match(password_pattern, password):
-            error = "パスワードは英語数字記号を含む、8文字以上で入力してください。"
-        elif email != confirm_email:
-            error = "メールアドレスが一致しません。"
-        elif not terms:
-            error = "個人情報保護方針が確認できていません。"
-        # =======================================
-
-        if error:
-            return render_template('index.html', events=events, error=error)
-
-        conn = sqlite3.connect(DB_NAME)
-        c = conn.cursor()
-
-        # 重複チェック
-        c.execute('SELECT id FROM reservations WHERE email = ? AND event_id = ?', (email, event_id))
-        existing = c.fetchone()
-
-        if existing:
-            conn.close()
-            error = "既にこのイベントに予約済みです。"
-            return render_template('index.html', events=events, error=error)
-
-        # 新規登録
-        c.execute('INSERT INTO reservations (name, email, password, event_id, comment) VALUES (?, ?, ?, ?, ?)',
-                  (name, email, password, event_id, comment))
-        conn.commit()
-        conn.close()
-
-        return redirect(url_for('success'))
-
-    return render_template('index.html', events=events)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     return render_template('register.html')
 
-@app.route('/register_verification', methods=['GET', 'POST'])
+@app.route('/register_success', methods=['GET', 'POST'])
 def act_register():
     
     if request.method == 'POST':
@@ -183,7 +123,7 @@ def act_register():
         # リソース消去
         request.close()
 
-        return render_template('register_verification.html',email = email)
+        return render_template('register_success.html',email = email)
     
     return render_template('register.html',)
 
@@ -205,13 +145,16 @@ def handle_form():
             conn = sqlite3.connect(DB_NAME)
             c = conn.cursor()
             c.execute('''
-                SELECT r.name, r.comment, e.name, e.date
-                FROM reservations r
-                JOIN events e ON r.event_id = e.id
-                WHERE r.email = ? AND r.password = ?
+                SELECT 
+                u.name AS user_name,
+                u.email AS user_email
+                FROM  user u 
+                WHERE u.email = ? 
+                AND u.password = ?
             ''', (email, password))
             reservations = c.fetchall()
             conn.close()
+            
 
             if not reservations:
                 error = "メールアドレスまたはパスワードが間違っています。"
