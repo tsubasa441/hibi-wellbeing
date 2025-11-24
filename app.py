@@ -1,7 +1,6 @@
 from flask import Flask, flash, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
-import os
 import secrets
 import re
 
@@ -232,6 +231,25 @@ def handle_form():
         return redirect(url_for('register'))
     
     return render_template('home.html', error=error)
+
+@app.route('/hibiowner', methods=['GET'])
+def hibiowner():
+    return render_template('admin_login.html')
+
+@app.route('/admin_password', methods=['GET', 'POST'])
+def admin_password():
+    error = None
+    action = request.form.get('action')
+    if action == 'admin_login':
+        if request.method == 'POST':
+            password = request.form['password']
+
+            if "0214wellness1106" != password:
+                error = "パスワードが間違っています。"
+            else:
+                return redirect(url_for('admin'))
+    
+    return render_template('admin_login.html', error=error)
 
 @app.route('/admin', methods=['GET'])
 def admin():

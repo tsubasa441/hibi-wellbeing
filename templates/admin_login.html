@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hibi 管理者用画面</title>
+  </head>
+  <body>
+    <!-- ロゴ画像 -->
+    <div class="top-image">
+      <img
+        src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
+        alt="ロゴ"
+        class="logo"
+      />
+    </div>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <div class="mainfield">
+      <h2>管理者用画面</h2>
+      <form action="{{ url_for('admin_password') }}" method="post">
+        <div class="top-item">
+          <input
+            type="password"
+            name="password"
+            placeholder="パスワード"
+            required
+          />
+        </div>
+        <div class="top-item">
+          <button
+            class="menu-button"
+            type="submit"
+            name="action"
+            value="admin_login"
+          >
+            ログイン
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
