@@ -28,9 +28,9 @@ def init_db():
     c = conn.cursor()
     # eventsテーブルの再作成時に日付カラム追加
     c.execute('''
-        CREATE TABLE IF NOT EXISTS events (attendance
+        CREATE TABLE IF NOT EXISTS events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            attendance INTEGER NOT NULL UNIQUE,
+            attendance INTEGER NOT NULL ,
             name TEXT NOT NULL UNIQUE,
             date TEXT NOT NULL
         )
@@ -257,8 +257,8 @@ def admin():
     c = conn.cursor()
 
     # イベント一覧取得（id, name, date）
-    c.execute('SELECT id, name, date FROM events ORDER BY date')
-    events = [dict(id=row[0], name=row[1], date=row[2]) for row in c.fetchall()]
+    c.execute('SELECT id, name, attendance , date FROM events ORDER BY date')
+    events = [dict(id=row[0], name=row[1],attendance=row[2], date=row[3]) for row in c.fetchall()]
 
     # 予約一覧（名前・メール・イベント名）
     c.execute('''
@@ -330,6 +330,15 @@ def add_event():
         flash("入力されていない項目があります", "error")
         conn.close()
         return redirect(url_for('admin'))
+    
+    try:
+        event_date_obj = datetime.strptime(event_date, "%Y-%m-%d").date()
+        if event_date_obj < date.today():
+            flash("開催日は本日以降の日付を指定してください。", "error")
+            return redirect(url_for('admin'))
+    except ValueError:
+        flash("日付の形式が不正です。", "error")
+        return redirect(url_for('admin'))
         
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -342,9 +351,10 @@ def add_event():
         return redirect(url_for('admin'))
     
     flash("イベント「"+event_name+"」を追加しました。", "success")
-    c.execute('INSERT INTO events (name, date) VALUES (?, ?)', (event_name, event_date))
+    c.execute('INSERT INTO events (attendance, name, date) VALUES (?,?,?)', (event_attendance, event_name, event_date))
     conn.commit()
     conn.close()
+    
     return redirect(url_for('admin'))
 
 @app.route('/admin/events/delete/<int:event_id>', methods=['POST'])

@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- TODO
+ ・イベント日未来のみに
+  -->
 <html lang="ja">
   <head>
     <link
@@ -66,25 +69,21 @@
         class="logo"
       />
     </div>
-    {% with errors = get_flashed_messages(category_filter=["error"]) %}
-    {% if errors %}
-        <div class="flash error">
-        {% for msg in errors %}
-            <p>{{ msg }}</p>
-        {% endfor %}
-        </div>
-    {% endif %}
-    {% endwith %}
-
-    {% with successes = get_flashed_messages(category_filter=["success"]) %}
-    {% if successes %}
-        <div class="flash success">
-        {% for msg in successes %}
-            <p>{{ msg }}</p>
-        {% endfor %}
-        </div>
-    {% endif %}
-    {% endwith %}
+    {% with errors = get_flashed_messages(category_filter=["error"]) %} {% if
+    errors %}
+    <div class="flash error">
+      {% for msg in errors %}
+      <p>{{ msg }}</p>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %} {% with successes =
+    get_flashed_messages(category_filter=["success"]) %} {% if successes %}
+    <div class="flash success">
+      {% for msg in successes %}
+      <p>{{ msg }}</p>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
 
     <div class="mainfield">
       <h1 class="admin-title">管理者画面</h1>
@@ -92,19 +91,17 @@
       <section class="add-event-form">
         <h2>新規イベント追加</h2>
         <form method="POST" action="{{ url_for('add_event') }}">
-          <p>イベント名：<input
-            type="text"
-            name="event_name"
-            required
-          /></p>
-          <p>参加人数　：<input
-                type="number"
-                name="event_attendance"
-                step="1"
-                min="1"
-                required
-            ></p>
-          <input type="date" name="event_date" required />
+          <p>イベント名：<input type="text" name="event_name" required /></p>
+          <p>
+            参加人数　：<input
+              type="number"
+              name="event_attendance"
+              step="1"
+              min="1"
+              required
+            />
+          </p>
+          <p>開催日　　：<input type="date" name="event_date" required /></p>
           <button type="submit">追加</button>
         </form>
       </section>
@@ -115,7 +112,8 @@
           <thead>
             <tr>
               <th>イベント名</th>
-              <th>日付</th>
+              <th>定員</th>
+              <th>開催日</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -123,6 +121,7 @@
             {% for event in events %}
             <tr>
               <td>{{ event.name }}</td>
+              <td>{{ event.attendance }}</td>
               <td>{{ event.date }}</td>
               <td>
                 <form
