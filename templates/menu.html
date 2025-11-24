@@ -18,20 +18,21 @@
         class="logo"
       />
     </div>
-    <div class="top-item">
-        <button
-            class="menu-button"
-            type="submit"
-            name="action"
-            value="login"
-        >
-            イベント予約
-        </button>
-    </div>
-    <div class="top-item">
-        <button class="menu-button" type="submit">
-            予約確認
-        </button>
+    <div class="mainfield">
+        <form action="{{ url_for('new_booking') }}" method="get">
+            <div class="top-item">
+                <button class="menu-button" type="submit">
+                    イベント予約
+                </button>
+            </div>
+        </form>
+        <form action="{{ url_for('reservation_confirmation') }}" method="get">
+            <div class="top-item">
+                <button class="menu-button" type="submit">
+                    予約確認
+                </button>
+            </div>
+        </form>
     </div>
 </body>
 </html>

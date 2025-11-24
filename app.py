@@ -62,6 +62,65 @@ def init_db():
 
 init_db()
 
+@app.route('/customer_request', methods=['GET', 'POST'])
+def customer_request():
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute('SELECT id, name, date FROM events ORDER BY id')
+    rows = c.fetchall()
+    conn.close()
+
+    events = []
+    for id_, name, date_str in rows:
+        dt = datetime.strptime(date_str, '%Y-%m-%d')
+        formatted_date = dt.strftime('%Y/%m/%d')
+        events.append((id_, name, formatted_date))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        event_id = request.form['event']
+        email = request.form['email']
+        confirm_email = request.form['confirm_email']
+        password = request.form['password']
+        comment = request.form.get('comment', '')
+        terms = request.form.get('terms')
+
+        error = None
+
+        # ====== ✅ パスワードチェック追加 ======
+        password_pattern = r'^[A-Za-z0-9]{8,16}$'
+        if not re.match(password_pattern, password):
+            error = "パスワードは半角英数字のみ、8～16文字で入力してください。"
+        elif email != confirm_email:
+            error = "メールアドレスが一致しません。"
+        elif not terms:
+            error = "個人情報保護方針が確認できていません。"
+        # =======================================
+
+        if error:
+            return render_template('index.html', events=events, error=error)
+
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+
+        # 重複チェック
+        c.execute('SELECT id FROM reservations WHERE email = ? AND event_id = ?', (email, event_id))
+        existing = c.fetchone()
+
+        if existing:
+            conn.close()
+            error = "既にこのイベントに予約済みです。"
+            return render_template('new_booking.html', events=events, error=error)
+
+        # 新規登録
+        c.execute('INSERT INTO reservations (name, email, password, event_id, comment) VALUES (?, ?, ?, ?, ?)',
+                  (name, email, password, event_id, comment))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('success'))
+
+    return render_template('index.html', events=events)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -130,6 +189,13 @@ def act_register():
     
     return render_template('register.html',)
 
+@app.route('/new_booking', methods=['GET', 'POST'])
+def new_booking():
+    return render_template('new_booking.html')
+
+@app.route('/reservation_confirmation', methods=['GET', 'POST'])
+def reservation_confirmation():
+    return render_template('reservation_confirmation.html')
 
 @app.route('/success')
 def success():
@@ -158,7 +224,6 @@ def handle_form():
             reservations = c.fetchall()
             conn.close()
             
-
             if not reservations:
                 error = "メールアドレスまたはパスワードが間違っています。"
             else:
