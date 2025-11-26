@@ -333,7 +333,7 @@ def add_event():
     
     try:
         event_date_obj = datetime.strptime(event_date, "%Y-%m-%d").date()
-        if event_date_obj < date.today():
+        if event_date_obj < datetime.today():
             flash("開催日は本日以降の日付を指定してください。", "error")
             return redirect(url_for('admin'))
     except ValueError:
