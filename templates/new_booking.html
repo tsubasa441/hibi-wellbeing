@@ -14,6 +14,7 @@
     {% endif %}
     <div class="mainfield">
         <form method="POST" action="{{ url_for('customer_request') }}">
+            <input type="hidden" name="user_id" value="{{ user_id }}">
             <h1>イベント予約</h1>
             <label for="event">参加イベント<span style="color:red;">*</span></label>
             <select id="event" name="event" required>

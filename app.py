@@ -41,7 +41,6 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
-            comment TEXT,
             FOREIGN KEY (event_id) REFERENCES events(id)
             FOREIGN KEY (user_id) REFERENCES user(user_id)
         )
@@ -63,63 +62,24 @@ init_db()
 
 @app.route('/customer_request', methods=['GET', 'POST'])
 def customer_request():
+    user_id = request.form.get('user_id')
+    event_id = request.form.get('event')
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('SELECT id, name, date FROM events ORDER BY id')
-    rows = c.fetchall()
+    # 重複チェック
+    c.execute('SELECT id FROM reservations WHERE event_id = ? AND user_id = ?', (event_id, user_id))
+    existing = c.fetchone()
+    if existing:
+        conn.close()
+        error = "既にこのイベントに予約済みです。"
+        return render_template('new_booking.html', error=error)
+    # イベント予約
+    c.execute('INSERT INTO reservations (event_id, user_id) VALUES (?, ?)',
+              (event_id, user_id))
+    conn.commit()
     conn.close()
 
-    events = []
-    for id_, name, date_str in rows:
-        dt = datetime.strptime(date_str, '%Y-%m-%d')
-        formatted_date = dt.strftime('%Y/%m/%d')
-        events.append((id_, name, formatted_date))
-
-    if request.method == 'POST':
-        name = request.form['name']
-        event_id = request.form['event']
-        email = request.form['email']
-        confirm_email = request.form['confirm_email']
-        password = request.form['password']
-        comment = request.form.get('comment', '')
-        terms = request.form.get('terms')
-
-        error = None
-
-        # ====== ✅ パスワードチェック追加 ======
-        password_pattern = r'^[A-Za-z0-9]{8,16}$'
-        if not re.match(password_pattern, password):
-            error = "パスワードは半角英数字のみ、8～16文字で入力してください。"
-        elif email != confirm_email:
-            error = "メールアドレスが一致しません。"
-        elif not terms:
-            error = "個人情報保護方針が確認できていません。"
-        # =======================================
-
-        if error:
-            return render_template('index.html', events=events, error=error)
-
-        conn = sqlite3.connect(DB_NAME)
-        c = conn.cursor()
-
-        # 重複チェック
-        c.execute('SELECT id FROM reservations WHERE email = ? AND event_id = ?', (email, event_id))
-        existing = c.fetchone()
-
-        if existing:
-            conn.close()
-            error = "既にこのイベントに予約済みです。"
-            return render_template('new_booking.html', events=events, error=error)
-
-        # 新規登録
-        c.execute('INSERT INTO reservations (name, email, password, event_id, comment) VALUES (?, ?, ?, ?, ?)',
-                  (name, email, password, event_id, comment))
-        conn.commit()
-        conn.close()
-
-        return redirect(url_for('success'))
-
-    return render_template('index.html', events=events)
+    return render_template('success.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -190,11 +150,56 @@ def act_register():
 
 @app.route('/new_booking', methods=['GET', 'POST'])
 def new_booking():
-    return render_template('new_booking.html')
+    email = request.args.get('email')
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute('SELECT user_id FROM user WHERE email == ?',(email,))
+    row = c.fetchone()
+    user_id = row[0] if row else None
 
-@app.route('/reservation_confirmation', methods=['GET', 'POST'])
+    c.execute('SELECT id, name, date FROM events ORDER BY date')
+    events = c.fetchall()
+    conn.close()
+
+    return render_template('new_booking.html', user_id=user_id, events=events)
+
+@app.route('/reservation_confirmation', methods=['GET'])
 def reservation_confirmation():
-    return render_template('reservation_confirmation.html')
+    email = request.args.get('email')
+    if not email:
+        flash("ログインしてください")
+        return redirect(url_for('home'))
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    # ユーザーIDと名前を取得
+    c.execute('SELECT user_id, name FROM user WHERE email = ?', (email,))
+    row = c.fetchone()
+    if not row:
+        conn.close()
+        flash("ユーザーが見つかりません")
+        return redirect(url_for('home'))
+
+    user_id, user_name = row
+
+    # 自分の予約情報を取得（イベント名・日付）
+    c.execute('''
+        SELECT e.name, e.date
+        FROM reservations r
+        JOIN events e ON r.event_id = e.id
+        WHERE r.user_id = ?
+        ORDER BY e.date
+    ''', (user_id,))
+    reservations = c.fetchall()
+    conn.close()
+
+    return render_template(
+        'reservation_confirmation.html',
+        reservations=reservations,
+        user_name=user_name
+    )
+
 
 @app.route('/success')
 def success():
@@ -226,7 +231,7 @@ def handle_form():
             if not reservations:
                 error = "メールアドレスまたはパスワードが間違っています。"
             else:
-                return render_template('menu.html', reservations=reservations)
+                return render_template('menu.html', reservations=reservations, email=email)
     elif action == 'register':
         return redirect(url_for('register'))
     
@@ -272,7 +277,7 @@ def admin():
 
     # メールごとの予約回数
     c.execute('''
-        SELECT COUNT(*)
+        SELECT u.email, COUNT(*)
         FROM reservations r
         JOIN user u
         ON r.user_id = u.user_id  GROUP BY u.user_id

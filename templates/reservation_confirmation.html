@@ -1,10 +1,36 @@
-<h1>予約内容</h1>
-<ul>
-    {% for name, comment, event_name, event_date in reservations %}
-    <li>
-        イベント: {{ event_name }} ({{ event_date }})<br>
-        お名前: {{ name }}<br>
-        コメント: {{ comment }}
-    </li>
-    {% endfor %}
-</ul>
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>予約内容確認</title>
+  </head>
+  <body>
+    <!-- ロゴ画像 -->
+    <div class="top-image">
+      <img
+        src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
+        alt="ロゴ"
+        class="logo"
+      />
+    </div>
+    <div class="mainfield">
+        <h2>{{ user_name }} さんの予約済み一覧</h2>
+        {% if reservations %}
+        <ul>
+            {% for event_name, event_date in reservations %}
+            <li>
+                イベント: {{ event_name }} ({{ event_date }})
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>予約はまだありません。</p>
+        {% endif %}
+    </div>
+  </body>
+</html>
