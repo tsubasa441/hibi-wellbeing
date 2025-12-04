@@ -79,7 +79,7 @@ def customer_request():
     conn.commit()
     conn.close()
 
-    return render_template('success.html')
+    return render_template('success.html' ,user_id=user_id)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -157,6 +157,17 @@ def new_booking():
     row = c.fetchone()
     user_id = row[0] if row else None
 
+    c.execute('SELECT id, name, date FROM events ORDER BY date')
+    events = c.fetchall()
+    conn.close()
+
+    return render_template('new_booking.html', user_id=user_id, events=events)
+
+@app.route('/return_newbooking', methods=['GET', 'POST'])
+def return_newbooking():
+    user_id = request.args.get('user_id')
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
     c.execute('SELECT id, name, date FROM events ORDER BY date')
     events = c.fetchall()
     conn.close()

@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-</head>
-<body class="success">
+  </head>
+  <body class="register_success">
     <div class="top-image">
-        <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" >
+      <img
+        src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
+        alt="ロゴ"
+      />
     </div>
-    <h1>予約を受け付けました。</h1>
-    <h2>当日のご参加をお待ちしております！！</h2>
-</body>
+    <div class="mainfield">
+      <h1 class="success-title">イベント予約完了</h1>
+      <p class="success-message">
+        予約を受け付けました。<br>
+        当日のご参加を心よりお待ちしております。<br>
+      </p>
+      <p></p>
+      <form class="top-form" method="GET" action="{{ url_for('return_newbooking') }}">
+        <input type="hidden" name="user_id" value="{{ user_id }}">
+        <div class="top-item">
+          <button class="menu-button" type="submit" class="menu-button">
+            新規イベント予約へ
+          </button>
+        </div>
+      </form>
+    </div>
+  </body>
 </html>
