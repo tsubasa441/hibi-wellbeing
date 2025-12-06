@@ -70,9 +70,12 @@ def customer_request():
     c.execute('SELECT id FROM reservations WHERE event_id = ? AND user_id = ?', (event_id, user_id))
     existing = c.fetchone()
     if existing:
+        c.execute('SELECT id, name, date FROM events ORDER BY date')
+        events = c.fetchall()
+        conn.close()
         conn.close()
         error = "既にこのイベントに予約済みです。"
-        return render_template('new_booking.html', error=error)
+        return render_template('new_booking.html', events=events, error=error)
     # イベント予約
     c.execute('INSERT INTO reservations (event_id, user_id) VALUES (?, ?)',
               (event_id, user_id))
