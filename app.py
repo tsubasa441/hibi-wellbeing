@@ -1,18 +1,11 @@
-from flask import Flask, flash, render_template, request, redirect, url_for
+from flask import Flask, flash, render_template, request, redirect, url_for, session
 import sqlite3
 from datetime import datetime
-import secrets
 import re
 
 ## シークレットキー挿入
 app = Flask(__name__)
-secret = secrets.token_urlsafe(32)
-app.config['SECRET_KEY'] = secret
-
-
-print(secrets.token_urlsafe(32))
-
-
+app.config['SECRET_KEY'] = 'hibi-secret-key'
 DB_NAME = 'database.db'
 
 @app.route('/')
@@ -35,23 +28,21 @@ def init_db():
             date TEXT NOT NULL
         )
     ''')
-    # reservationsテーブルはそのまま
     c.execute('''
         CREATE TABLE IF NOT EXISTS reservations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
-            FOREIGN KEY (event_id) REFERENCES events(id)
+            FOREIGN KEY (event_id) REFERENCES events(id),
             FOREIGN KEY (user_id) REFERENCES user(user_id)
         )
     ''')
-    # userテーブルはそのまま
     c.execute('''
         CREATE TABLE IF NOT EXISTS user (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             is_provisional BOOL DEFAULT TRUE,
             name TEXT NOT NULL,
-            email TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL
         )
     ''')
@@ -62,7 +53,10 @@ init_db()
 
 @app.route('/customer_request', methods=['GET', 'POST'])
 def customer_request():
-    user_id = request.form.get('user_id')
+    if not session.get('login_ok'):
+        return redirect(url_for('home'))
+
+    user_id = session.get('user_id')
     event_id = request.form.get('event')
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -73,7 +67,6 @@ def customer_request():
         c.execute('SELECT id, name, date FROM events ORDER BY date')
         events = c.fetchall()
         conn.close()
-        conn.close()
         error = "既にこのイベントに予約済みです。"
         return render_template('new_booking.html', events=events, error=error)
     # イベント予約
@@ -82,7 +75,7 @@ def customer_request():
     conn.commit()
     conn.close()
 
-    return render_template('success.html' ,user_id=user_id)
+    return render_template('success.html', user_id=user_id)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -90,7 +83,6 @@ def register():
 
 @app.route('/register_success', methods=['GET', 'POST'])
 def act_register():
-    
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
@@ -101,7 +93,7 @@ def act_register():
 
         error = None
 
-        # ============= 入力チェック ==============
+        # 入力チェック
         password_pattern = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!-/:-@[-`{-~])[A-Za-z\d!-/:-@[-`{-~]{8,}$'
         if email != confirm_email:
             error = "メールアドレスが一致しません。"
@@ -109,57 +101,47 @@ def act_register():
             error = "パスワードは英語数字記号を含む、8文字以上で入力してください。"
         elif password != confirm_password:
             error = "パスワードが一致しません。"
-
         elif not terms:
             error = "個人情報保護方針が確認できていません。"
-        # ========================================
             
         if error:
-            return render_template('register.html',   error=error,
-                name=name,
-                email=email,
-                confirm_email=confirm_email,
-                password=password,
-                confirm_password=confirm_password,
-                terms=terms)
-        # ============= メールアドレス重複チェック ==============
+            return render_template('register.html', error=error,
+                                   name=name, email=email,
+                                   confirm_email=confirm_email,
+                                   password=password,
+                                   confirm_password=confirm_password,
+                                   terms=terms)
+
+        # メールアドレス重複チェック
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
-        c.execute('SELECT user_id FROM user WHERE email == ?',(email,))
-        row = c.fetchall()
+        c.execute('SELECT user_id FROM user WHERE email = ?', (email,))
+        row = c.fetchone()
         conn.close()
-        if row.__len__() != 0:
+        if row:
             error = "既に登録されているメールアドレスです。"
-        # =======================================================
-        
-        if error:
-            return render_template('register.html',  error=error)
+            return render_template('register.html', error=error)
 
-        conn = sqlite3.connect(DB_NAME)
-        cursor = conn.cursor()
-        
         # 新規登録
-        cursor.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)',
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        c.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)',
                   (name, email, password))
         conn.commit()
         conn.close()
-        
-        # リソース消去
-        request.close()
 
-        return render_template('register_success.html',email = email)
-    
-    return render_template('register.html',)
+        return render_template('register_success.html', email=email)
+
+    return render_template('register.html')
 
 @app.route('/new_booking', methods=['GET', 'POST'])
 def new_booking():
-    email = request.args.get('email')
+    if not session.get('login_ok'):
+        return redirect(url_for('home'))
+
+    user_id = session.get('user_id')  # セッションから直接取得
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('SELECT user_id FROM user WHERE email == ?',(email,))
-    row = c.fetchone()
-    user_id = row[0] if row else None
-
     c.execute('SELECT id, name, date FROM events ORDER BY date')
     events = c.fetchall()
     conn.close()
@@ -168,27 +150,23 @@ def new_booking():
 
 @app.route('/return_newbooking', methods=['GET', 'POST'])
 def return_newbooking():
-    user_id = request.args.get('user_id')
+    user_id = session.get('user_id')
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute('SELECT id, name, date FROM events ORDER BY date')
     events = c.fetchall()
     conn.close()
-
     return render_template('new_booking.html', user_id=user_id, events=events)
 
 @app.route('/reservation_confirmation', methods=['GET'])
 def reservation_confirmation():
-    email = request.args.get('email')
-    if not email:
-        flash("ログインしてください")
+    if not session.get('login_ok'):
         return redirect(url_for('home'))
+    user_id = session.get('user_id')
 
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-
-    # ユーザーIDと名前を取得
-    c.execute('SELECT user_id, name FROM user WHERE email = ?', (email,))
+    c.execute('SELECT user_id, name FROM user WHERE user_id = ?', (user_id,))
     row = c.fetchone()
     if not row:
         conn.close()
@@ -197,7 +175,6 @@ def reservation_confirmation():
 
     user_id, user_name = row
 
-    # 自分の予約情報を取得（イベント名・日付）
     c.execute('''
         SELECT e.name, e.date
         FROM reservations r
@@ -208,11 +185,7 @@ def reservation_confirmation():
     reservations = c.fetchall()
     conn.close()
 
-    return render_template(
-        'reservation_confirmation.html',
-        reservations=reservations,
-        user_name=user_name
-    )
+    return render_template('reservation_confirmation.html', reservations=reservations, user_name=user_name)
 
 @app.route('/success')
 def success():
@@ -221,33 +194,30 @@ def success():
 @app.route('/handle_form', methods=['GET', 'POST'])
 def handle_form():
     action = request.form.get('action')
-    if action == 'login':
-        if request.method == 'POST':
-            error = None
-            reservations = []
-            email = request.form['email']
-            password = request.form['password']
+    error = None
 
-            conn = sqlite3.connect(DB_NAME)
-            c = conn.cursor()
-            c.execute('''
-                SELECT 
-                u.name AS user_name,
-                u.email AS user_email
-                FROM  user u 
-                WHERE u.email = ? 
-                AND u.password = ?
-            ''', (email, password))
-            reservations = c.fetchall()
-            conn.close()
-            
-            if not reservations:
-                error = "メールアドレスまたはパスワードが間違っています。"
-            else:
-                return render_template('menu.html', reservations=reservations, email=email)
+    if action == 'login' and request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        c.execute('SELECT user_id, name, email FROM user WHERE email = ? AND password = ?', (email, password))
+        user = c.fetchone()
+        conn.close()
+
+        if not user:
+            error = "メールアドレスまたはパスワードが間違っています。"
+        else:
+            session.clear()
+            session['login_ok'] = True
+            session['user_id'] = user[0]
+            session['user_email'] = user[2]
+            return render_template('menu.html', reservations=[user])
+
     elif action == 'register':
         return redirect(url_for('register'))
-    
+
     return render_template('home.html', error=error)
 
 @app.route('/hibiowner', methods=['GET'])
@@ -258,27 +228,27 @@ def hibiowner():
 def admin_password():
     error = None
     action = request.form.get('action')
-    if action == 'admin_login':
-        if request.method == 'POST':
-            password = request.form['password']
-
-            if "0214wellness1106" != password:
-                error = "パスワードが間違っています。"
-            else:
-                return redirect(url_for('admin'))
-    
+    if action == 'admin_login' and request.method == 'POST':
+        password = request.form['password']
+        if "0214wellness1106" != password:
+            error = "パスワードが間違っています。"
+        else:
+            session.clear()
+            session['is_admin'] = True  # 管理者セッションを設定
+            return redirect(url_for('admin'))
     return render_template('admin_login.html', error=error)
 
 @app.route('/admin', methods=['GET'])
 def admin():
+    # 管理者権限チェック
+    if not session.get('is_admin'):
+        return redirect(url_for('hibiowner'))
+
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-
-    # イベント一覧取得（id, name, date）
     c.execute('SELECT id, name, attendance , date FROM events ORDER BY date')
-    events = [dict(id=row[0], name=row[1],attendance=row[2], date=row[3]) for row in c.fetchall()]
+    events = [dict(id=row[0], name=row[1], attendance=row[2], date=row[3]) for row in c.fetchall()]
 
-    # 予約一覧（名前・メール・イベント名）
     c.execute('''
         SELECT u.name, u.email, e.name
         FROM reservations r
@@ -288,16 +258,14 @@ def admin():
     ''')
     reservations = c.fetchall()
 
-    # メールごとの予約回数
     c.execute('''
         SELECT u.email, COUNT(*)
         FROM reservations r
-        JOIN user u
-        ON r.user_id = u.user_id  GROUP BY u.user_id
-        ''')
+        JOIN user u ON r.user_id = u.user_id
+        GROUP BY u.user_id
+    ''')
     email_counts = dict(c.fetchall())
 
-    # イベント別参加人数
     c.execute('''
         SELECT e.name, COUNT(r.id)
         FROM reservations r
@@ -307,83 +275,13 @@ def admin():
     event_counts = c.fetchall()
 
     conn.close()
+    return render_template('admin.html', events=events, reservations=reservations,
+                           email_counts=email_counts, event_counts=event_counts)
 
-    return render_template('admin.html',
-                           events=events,
-                           reservations=reservations,
-                           email_counts=email_counts,
-                           event_counts=event_counts)
-
-@app.route('/mainmenu', methods=['POST'])
-def mainmenu():
-    error = None
-    account = []
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        conn = sqlite3.connect("database.db")
-        c = conn.cursor()
-        c.execute('''
-            SELECT r.email, e.password
-            FROM reservations r
-            JOIN events e ON r.event_id = e.id
-            WHERE r.email = ? AND r.password = ?
-        ''', (email, password))
-        account = c.fetchall()
-        conn.close()
-    if not account:
-        error = "メールアドレスまたはパスワードが間違っています。"
-    else:
-        return render_template('reservation_list.html', account=account)
-    
-    return render_template('mainmenu.html', error=error)
-    
-@app.route('/admin/events', methods=['POST'])
-def add_event():
-    event_name = request.form.get('event_name')
-    event_attendance = request.form.get('event_attendance')
-    event_date = request.form.get('event_date')
-    ## 入力チェック
-    if ((event_name and event_date and event_attendance)==False):
-        flash("入力されていない項目があります", "error")
-        conn.close()
-        return redirect(url_for('admin'))
-    
-    try:
-        event_date_obj = datetime.strptime(event_date, "%Y-%m-%d").date()
-        if event_date_obj < datetime.today().date():
-            flash("開催日は本日以降の日付を指定してください。", "error")
-            return redirect(url_for('admin'))
-    except ValueError:
-        flash("日付の形式が不正です。", "error")
-        return redirect(url_for('admin'))
-        
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    c.execute('SELECT id FROM events WHERE name = ?', (event_name,))
-    
-    ## 登録されている場合
-    if c.fetchone():
-        flash("既に登録されているイベントです。", "error")
-        conn.close()
-        return redirect(url_for('admin'))
-    
-    flash("イベント「"+event_name+"」を追加しました。", "success")
-    c.execute('INSERT INTO events (attendance, name, date) VALUES (?,?,?)', (event_attendance, event_name, event_date))
-    conn.commit()
-    conn.close()
-    
-    return redirect(url_for('admin'))
-
-@app.route('/admin/events/delete/<int:event_id>', methods=['POST'])
-def delete_event(event_id):
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    # 予約に紐づく場合は制御したいですが、今回はシンプルに削除
-    c.execute('DELETE FROM events WHERE id = ?', (event_id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('admin'))
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)
