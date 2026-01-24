@@ -10,6 +10,12 @@
   <title>Hibi トップページ</title>
 </head>
 <body>
+    <!-- 右上にログアウトリンク -->
+    {% if session.get('login_ok') %}
+    <div class="logout-link">
+        <a href="{{ url_for('logout') }}">ログアウト</a>
+    </div>
+    {% endif %}
     <!-- ロゴ画像 -->
     <div class="top-image">
       <img

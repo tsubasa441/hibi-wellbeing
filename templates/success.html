@@ -9,6 +9,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
   <body class="register_success">
+    <!-- 右上にログアウトリンク -->
+    {% if session.get('login_ok') %}
+    <div class="logout-link">
+        <a href="{{ url_for('logout') }}">ログアウト</a>
+    </div>
+    {% endif %}
     <div class="top-image">
       <img
         src="{{ url_for('static', filename='documents/Hibi_logo.png') }}"
