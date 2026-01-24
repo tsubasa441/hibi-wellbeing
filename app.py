@@ -94,9 +94,13 @@ def act_register():
         error = None
 
         # 入力チェック
+        email_pattern = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
         password_pattern = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!-/:-@[-`{-~])[A-Za-z\d!-/:-@[-`{-~]{8,}$'
+
         if email != confirm_email:
             error = "メールアドレスが一致しません。"
+        elif not re.match(email_pattern, email):
+            error = "メールアドレスが正しくありません。"
         elif not re.match(password_pattern, password):
             error = "パスワードは英語数字記号を含む、8文字以上で入力してください。"
         elif password != confirm_password:
