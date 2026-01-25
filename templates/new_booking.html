@@ -15,11 +15,13 @@
     <div class="top-image">
         <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" >
     </div>
-    {% if error %}
-    <div class="error">{{ error }}</div>
-    {% endif %}
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="error">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
     <div class="mainfield">
-        <form method="POST" action="{{ url_for('customer_request') }}">
+        <form method="post" action="{{ url_for('customer_request') }}">
             <input type="hidden" name="user_id" value="{{ user_id }}">
             <h1>イベント予約</h1>
             <label for="event">参加イベント<span style="color:red;">*</span></label>
