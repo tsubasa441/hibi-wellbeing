@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
   <head>
     <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}"
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
     />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,7 +13,7 @@
     <!-- 右上にログアウトリンク -->
     {% if session.get('login_ok') %}
     <div class="logout-link">
-        <a href="{{ url_for('logout') }}">ログアウト</a>
+      <a href="{{ url_for('logout') }}">ログアウト</a>
     </div>
     {% endif %}
     <!-- ロゴ画像 -->
@@ -25,18 +25,19 @@
       />
     </div>
     <div class="mainfield">
-        <h3>{{ user_name }} さんの予約済み一覧</h3>
-        {% if reservations %}
-        <ul>
-            {% for event_name, event_date in reservations %}
-            <li>
-                イベント: {{ event_name }} ({{ event_date }})
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>予約はまだありません。</p>
-        {% endif %}
+      <h3>{{ user_name }} さんの予約済み一覧</h3>
+      {% if reservations %}
+      <ul>
+        {% for event_name, event_date in reservations %}
+        <li>イベント: {{ event_name }} ({{ event_date }})</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>予約はまだありません。</p>
+      {% endif %}
+      <form class="top-form" method="GET" action="{{ url_for('return_menu') }}">
+        <button id="back-button" type="submit">メニューに戻る</button>
+      </form>
     </div>
   </body>
 </html>
