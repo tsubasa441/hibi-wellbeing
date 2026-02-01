@@ -1,6 +1,7 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, session
 import sqlite3
 from datetime import datetime
+from datetime import date
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
 from utils import encrypt_email, decrypt_email, hash_email
@@ -26,9 +27,10 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            attendance INTEGER NOT NULL ,
-            name TEXT NOT NULL UNIQUE,
-            date TEXT NOT NULL
+            attendance INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            date TEXT NOT NULL,
+            UNIQUE(name, date)
         )
     ''')
     c.execute('''
@@ -298,6 +300,56 @@ def admin():
     conn.close()
     return render_template('admin.html', events=events, reservations=reservations,
                            email_counts=email_counts, event_counts=event_counts)
+
+@app.route('/admin/events', methods=['POST'])
+def add_event():
+    event_name = request.form.get('event_name')
+    event_attendance = request.form.get('event_attendance')
+    event_date = request.form.get('event_date')
+    ## 入力チェック
+    if ((event_name and event_date and event_attendance)==False):
+        flash("入力されていない項目があります", "error")
+        conn.close()
+        return redirect(url_for('admin'))
+    
+    try:
+        event_date_obj = datetime.strptime(event_date, "%Y-%m-%d").date()
+        if event_date_obj < date.today():
+            flash("開催日は本日以降の日付を指定してください。", "error")
+            return redirect(url_for('admin'))
+    except ValueError:
+        flash("日付の形式が不正です。", "error")
+        return redirect(url_for('admin'))
+        
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute(
+        'SELECT id FROM events WHERE name = ? AND date = ?',
+        (event_name, event_date)
+    )
+    
+    ## 登録されている場合
+    if c.fetchone():
+        flash("既に登録されているイベントです。", "error")
+        conn.close()
+        return redirect(url_for('admin'))
+    
+    flash("イベント「"+event_name+"」を追加しました。", "success")
+    c.execute('INSERT INTO events (attendance, name, date) VALUES (?,?,?)', (event_attendance, event_name, event_date))
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('admin'))
+
+@app.route('/admin/events/delete/<int:event_id>', methods=['POST'])
+def delete_event(event_id):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    # 予約に紐づく場合は制御したいですが、今回はシンプルに削除
+    c.execute('DELETE FROM events WHERE id = ?', (event_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
 
 @app.route('/logout')
 def logout():
