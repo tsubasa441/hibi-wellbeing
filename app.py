@@ -60,7 +60,7 @@ init_db()
 @app.route('/customer_request', methods=['POST'])
 def customer_request():
     if not session.get('login_ok'):
-        return redirect(url_for('menu'))
+        return render_template('home.html')
 
     user_id = session.get('user_id')
 
@@ -74,7 +74,25 @@ def customer_request():
         existing = c.fetchone()
         if existing:
             conn.close()
-            flash("既にこのイベントに予約済みです。")
+            flash("既にこのイベントに予約済みです。", "error")
+            return redirect(url_for('new_booking'))
+        
+        # 定員チェック
+        c.execute('SELECT count(*),attendance FROM events INNER JOIN reservations ON events.id = reservations.event_id WHERE events.id = ?', (event_id,))
+        event = c.fetchone()
+        
+        if event[1]!= None and event[0]+1 >= event[1]:
+            conn.close()
+            flash("このイベントはすでに定員が埋まっています。", "error")
+            return redirect(url_for('new_booking'))
+        
+        # 日時チェック
+        c.execute('SELECT id FROM events WHERE events.id = ? and date < ?', (event_id,date.today().isoformat(),))
+        event_date = c.fetchone()
+        
+        if event_date:
+            conn.close()
+            flash("このイベントはすでに終了しています。", "error")
             return redirect(url_for('new_booking'))
 
         # イベント予約
@@ -82,7 +100,7 @@ def customer_request():
         conn.commit()
         conn.close()
 
-        flash("予約が完了しました。")
+        flash("予約が完了しました。", "success")
         return redirect(url_for('new_booking'))
 
     conn = sqlite3.connect(DB_NAME)
@@ -115,7 +133,7 @@ def act_register():
         if email != confirm_email:
             error = "メールアドレスが一致しません。"
         elif not re.match(email_pattern, email):
-            error = "メールアドレスが正しくありません。"
+            error = "メールアドレスの形式が不正です。"
         elif not re.match(password_pattern, password):
             error = "パスワードは英語数字記号を含む、8文字以上で入力してください。"
         elif password != confirm_password:
@@ -166,7 +184,7 @@ def new_booking():
     user_id = session.get('user_id')  # セッションから直接取得
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('SELECT id, name, date FROM events ORDER BY date')
+    c.execute('SELECT id, name, date FROM events WHERE date >= ? ORDER BY date', (date.today().isoformat(),))
     events = c.fetchall()
     conn.close()
 
@@ -253,7 +271,9 @@ def admin_password():
     action = request.form.get('action')
     if action == 'admin_login' and request.method == 'POST':
         password = request.form['password']
-        if "0214wellness1106" != password:
+        an : str = "scrypt:32768:8:1$Hf7ICmIn5emeZmV3$6f54fbf72833e2f16699ab56968f857a1084a958a1b270f6d852f44973dddfb265f21b3ec04d9bf7a4b6e96bd117e280494e117f659f5f721d122e3679ac5cb3"
+        
+        if check_password_hash(an, password) == False:
             error = "パスワードが間違っています。"
         else:
             session.clear()
@@ -309,7 +329,6 @@ def add_event():
     ## 入力チェック
     if ((event_name and event_date and event_attendance)==False):
         flash("入力されていない項目があります", "error")
-        conn.close()
         return redirect(url_for('admin'))
     
     try:

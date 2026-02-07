@@ -15,11 +15,21 @@
     <div class="top-image">
         <img src="{{ url_for('static', filename='documents/Hibi_logo.png') }}" alt="ロゴ" >
     </div>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="error">{{ messages[0] }}</div>
-      {% endif %}
-    {% endwith %}
+    {% with errors = get_flashed_messages(category_filter=["error"]) %} {% if
+    errors %}
+    <div class="flash error">
+      {% for msg in errors %}
+      <p>{{ msg }}</p>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %} {% with successes =
+    get_flashed_messages(category_filter=["success"]) %} {% if successes %}
+    <div class="flash success">
+      {% for msg in successes %}
+      <p>{{ msg }}</p>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
     <div class="mainfield">
         <form method="post" action="{{ url_for('customer_request') }}">
             <input type="hidden" name="user_id" value="{{ user_id }}">
